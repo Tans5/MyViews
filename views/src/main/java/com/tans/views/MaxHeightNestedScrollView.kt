@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.WindowManager
 
-import com.tans.avatarview.views.R
+import com.tans.views.R
 
 class MaxHeightNestedScrollView : NestedScrollView {
 

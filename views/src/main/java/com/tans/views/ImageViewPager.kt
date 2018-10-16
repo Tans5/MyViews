@@ -13,7 +13,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
-import com.tans.avatarview.views.R
+import com.tans.views.R
 
 typealias LoadImage = (Int, ImageView) -> Unit
 typealias PageScrollState = (Int) -> Unit

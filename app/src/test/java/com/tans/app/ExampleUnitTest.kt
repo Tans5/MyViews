@@ -1,4 +1,4 @@
-package com.tans.views
+package com.tans.app
 
 import org.junit.Test
 
