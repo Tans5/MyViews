@@ -34,7 +34,7 @@ class AvatarView : ImageView {
         } else {
             throw Throwable("Wrong drawable.")
         }
-        val bitmapPaint = createBasePaint(createBaseBitmapShader(bitmap, calculateScale(bitmap, border)))
+        val bitmapPaint = createBasePaint(createBaseBitmapShader(bitmap, calculateScale(bitmap)))
         val borderPaint = createBorderPaint(border)
         val circle = calculateCircle(border)
         if (shape == Shape.Circle) {
@@ -76,18 +76,18 @@ class AvatarView : ImageView {
                 setLocalMatrix(matrix)
             }
 
-    private fun calculateScale(bitmap: Bitmap, border: Border): Scale {
+    private fun calculateScale(bitmap: Bitmap): Scale {
         val bWith = bitmap.width.toFloat()
         val bHeight = bitmap.height.toFloat()
-        val mWith = measuredWidth.toFloat() - border.width * 2
-        val mHeight = measuredHeight.toFloat() - border.width * 2
+        val mWith = measuredWidth.toFloat()
+        val mHeight = measuredHeight.toFloat()
         val scale = if (bWith / bHeight > mWith / mHeight) {
             mHeight / bHeight
         } else {
             mWith / bWith
         }
-        val offX = (mWith - bWith * scale) / 2 + 2 * border.width
-        val offY = (mHeight - bHeight * scale) / 2 + 2 * border.width
+        val offX = (mWith - bWith * scale) / 2
+        val offY = (mHeight - bHeight * scale) / 2
         return Scale(scale = scale, offX = offX, offY = offY)
     }
 
@@ -137,6 +137,7 @@ class AvatarView : ImageView {
         path.lineTo(points[4].x, points[4].y)
         path.lineTo(points[5].x, points[5].y)
         path.lineTo(points[0].x, points[0].y)
+        path.close()
         return path
     }
 
