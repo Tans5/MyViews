@@ -15,26 +15,22 @@ import android.widget.LinearLayout
 import android.widget.RadioButton
 import com.tans.views.others.*
 
-//TODO: Here have some bugs need to fix.
 class SimplifiedViewPager : FrameLayout {
 
     private lateinit var events: Events
 
     private val viewPager: ViewPager by lazy {
-        ViewPager(context).also {
-            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-                    .apply {
-                        it.layoutParams = this
-                    }
-            addView(it)
+        ViewPager(context).apply {
+            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            this@SimplifiedViewPager.addView(this)
         }
 
     }
 
     private val pointsParent: LinearLayout by lazy {
-        LinearLayout(context).also {
-            it.orientation = LinearLayout.HORIZONTAL
-            addView(it)
+        LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            this@SimplifiedViewPager.addView(this)
         }
     }
 
@@ -93,11 +89,11 @@ class SimplifiedViewPager : FrameLayout {
 
     private fun createPoints(size: Int, indicator: Indicator): List<RadioButton> = MutableList(size) { createPointView(indicator) }
 
-    private fun createPointView(indicator: Indicator): RadioButton = RadioButton(context).also {
-        it.background = indicator.drawable
-        LinearLayout.LayoutParams(context.dp2px(indicator.width.toFloat()), context.dp2px(indicator.height.toFloat())).apply {
+    private fun createPointView(indicator: Indicator): RadioButton = RadioButton(context).apply {
+        background = indicator.drawable.constantState?.newDrawable()
+        buttonDrawable = null
+        layoutParams = LinearLayout.LayoutParams(context.dp2px(indicator.width.toFloat()), context.dp2px(indicator.height.toFloat())).apply {
             setMargins(context.dp2px(indicator.margin.toFloat()), 0, context.dp2px(indicator.margin.toFloat()), 0)
-            it.layoutParams = this
         }
     }
 
@@ -138,12 +134,12 @@ class SimplifiedViewPager : FrameLayout {
         }
 
         override fun instantiateItem(container: ViewGroup, position: Int): Any = events.loadView.invoke(position.scrollPosition(size, circleScroll))
-                .also {
-                    if (it.layoutParams == null) {
-                        it.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply {
+                    if (layoutParams == null) {
+                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                     }
-                    container.addView(it)
-                    it.setOnClickListener {
+                    container.addView(this)
+                    setOnClickListener { _ ->
                         if (events.itemClick is Option.Some) {
                             (events.itemClick as Option.Some<Action1<Int>>).value
                                     .invoke(position.scrollPosition(size, circleScroll))

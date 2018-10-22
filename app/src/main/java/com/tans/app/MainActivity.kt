@@ -19,8 +19,8 @@ class MainActivity : AppCompatActivity() {
                                 margin = 5,
                                 drawable = resources.getDrawable(R.drawable.view_pager_postion_maker, theme),
                                 parentMarginBottom = 20),
-                        events = SimplifiedViewPager.Events(loadView = { ImageView(this).also {
-                            it.setImageDrawable(resources.getDrawable(R.drawable.test, theme))
+                        events = SimplifiedViewPager.Events(loadView = { ImageView(this).apply {
+                            setImageDrawable(resources.getDrawable(R.drawable.test, theme))
                         } }))
     }
 }
