@@ -12,7 +12,7 @@
         android:orientation="vertical"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <com.tans.views.ImageViewPager
+        <com.tans.views.SimplifiedViewPager
             android:id="@+id/image_viewpager"
             android:layout_width="match_parent"
             android:layout_height="200dp" />

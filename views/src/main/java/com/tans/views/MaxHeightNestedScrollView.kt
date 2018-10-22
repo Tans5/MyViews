@@ -4,9 +4,7 @@ import android.content.Context
 import android.support.v4.widget.NestedScrollView
 import android.util.AttributeSet
 import android.view.View
-import android.view.WindowManager
-
-import com.tans.views.R
+import com.tans.views.others.screenSize
 
 class MaxHeightNestedScrollView : NestedScrollView {
 
@@ -37,14 +35,9 @@ class MaxHeightNestedScrollView : NestedScrollView {
         val a = context.obtainStyledAttributes(attrs, R.styleable.MaxHeightNestedScrollView)
         maxHeight = a.getDimension(R.styleable.MaxHeightNestedScrollView_maxHeight, 0f).toInt()
         if (maxHeight == 0) {
-            maxHeight = (a.getFloat(R.styleable.MaxHeightNestedScrollView_maxHeightRatio, 1f) * getScreamHeight(context)).toInt()
+            maxHeight = (a.getFloat(R.styleable.MaxHeightNestedScrollView_maxHeightRatio, 1f) *
+                    context.screenSize().x).toInt()
         }
         a.recycle()
-    }
-
-    private fun getScreamHeight(context: Context): Int {
-        val wm = context
-                .getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        return wm.defaultDisplay.height
     }
 }

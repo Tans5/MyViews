@@ -1,6 +1,7 @@
 package com.tans.views
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.view.PagerAdapter
@@ -10,13 +11,12 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import com.tans.views.others.*
 
-
-class ImageViewPager : FrameLayout {
+//TODO: Here have some bugs need to fix.
+class SimplifiedViewPager : FrameLayout {
 
     private lateinit var events: Events
 
@@ -33,12 +33,6 @@ class ImageViewPager : FrameLayout {
 
     private val pointsParent: LinearLayout by lazy {
         LinearLayout(context).also {
-            FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
-                    .apply {
-                        this.setMargins(0, 0, 0, 25)
-                        this.gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
-                        it.layoutParams = this
-                    }
             it.orientation = LinearLayout.HORIZONTAL
             addView(it)
         }
@@ -50,7 +44,7 @@ class ImageViewPager : FrameLayout {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
-    fun start(size: Int, circleScroll: Boolean = false, showIndicator: Boolean = true, events: Events, f: (Controller.() -> Unit)? = null) {
+    fun start(size: Int, circleScroll: Boolean = false, indicator: Indicator? = null, events: Events, f: (Controller.() -> Unit)? = null) {
         if (size <= 0) return
         this.events = events
 
@@ -69,19 +63,24 @@ class ImageViewPager : FrameLayout {
             }
 
             override fun onPageSelected(p0: Int) {
-                if (showIndicator) {
+                if (indicator != null) {
                     for (i in 0 until pointsParent.childCount) {
                         (pointsParent.getChildAt(i) as RadioButton).isChecked = i == p0.scrollPosition(size, circleScroll)
                     }
+                }
+
+                if (events.pageSelected is Option.Some) {
+                    events.pageSelected.value.invoke(p0.scrollPosition(size, circleScroll))
                 }
             }
 
         })
 
-        if (showIndicator) {
-            createPoints(size).forEachIndexed { i, view ->
+        if (indicator != null) {
+            createPoints(size, indicator).forEachIndexed { i, view ->
                 pointsParent.addView(view, i)
             }
+            pointsParent.layoutParams = createPointParentLayoutParam(indicator)
             (pointsParent.getChildAt(0) as RadioButton).isChecked = true
         }
 
@@ -92,15 +91,22 @@ class ImageViewPager : FrameLayout {
         }
     }
 
-    private fun createPoints(size: Int): List<RadioButton> = MutableList(size) { createPointView() }
+    private fun createPoints(size: Int, indicator: Indicator): List<RadioButton> = MutableList(size) { createPointView(indicator) }
 
-    private fun createPointView(): RadioButton = RadioButton(context).also {
-        it.background = resources.getDrawable(R.drawable.view_pager_postion_maker, context.theme)
-        LinearLayout.LayoutParams(20, 20).apply {
-            setMargins(10, 0, 10, 0)
+    private fun createPointView(indicator: Indicator): RadioButton = RadioButton(context).also {
+        it.background = indicator.drawable
+        LinearLayout.LayoutParams(context.dp2px(indicator.width.toFloat()), context.dp2px(indicator.height.toFloat())).apply {
+            setMargins(context.dp2px(indicator.margin.toFloat()), 0, context.dp2px(indicator.margin.toFloat()), 0)
             it.layoutParams = this
         }
     }
+
+    private fun createPointParentLayoutParam(indicator: Indicator): FrameLayout.LayoutParams =
+            FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+            .apply {
+                setMargins(0, 0, 0, this@SimplifiedViewPager.context.dp2px(indicator.parentMarginBottom.toFloat()))
+                gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+            }
 
     private fun Int.scrollPosition(size: Int, isScroll: Boolean) =
             if (isScroll) {
@@ -126,12 +132,12 @@ class ImageViewPager : FrameLayout {
         override fun setPrimaryItem(container: ViewGroup, position: Int, view: Any) {
             super.setPrimaryItem(container, position, view)
             if (events.selectedImage is Option.Some) {
-                (events.selectedImage as Option.Some<Action1<ImageView>>).value
-                        .invoke(view as ImageView)
+                (events.selectedImage as Option.Some<Action1<View>>).value
+                        .invoke(view as View)
             }
         }
 
-        override fun instantiateItem(container: ViewGroup, position: Int): Any = events.loadImage.invoke(position.scrollPosition(size, circleScroll))
+        override fun instantiateItem(container: ViewGroup, position: Int): Any = events.loadView.invoke(position.scrollPosition(size, circleScroll))
                 .also {
                     if (it.layoutParams == null) {
                         it.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -152,17 +158,23 @@ class ImageViewPager : FrameLayout {
             viewPager.currentItem = viewPager.currentItem + len
         }
 
-        fun moveToNextpage() {
+        fun moveToNextPage() {
             viewPager.currentItem ++
         }
     }
 
-    data class Events(val loadImage: Func1<Int, ImageView>,
+    data class Events(val loadView: Func1<Int, View>,
                       val itemClick: Option<Action1<Int>> = none(),
                       val pageScrollStateChanged: Option<Action1<Int>> = none(),
                       val pageScrolled: Option<Action3<Int, Float, Int>> = none(),
                       val pageSelected: Option<Action1<Int>> = none(),
-                      val selectedImage: Option<Action1<ImageView>> = none())
+                      val selectedImage: Option<Action1<View>> = none())
+
+    data class Indicator(val width: Int,
+                         val height: Int,
+                         val margin: Int,
+                         val drawable: Drawable,
+                         val parentMarginBottom: Int)
 
     companion object {
         const val CIRCLE_SCROLL_ITEM_SIZE = 1000
