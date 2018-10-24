@@ -15,4 +15,12 @@
         <attr name="maxHeight" format="dimension" />
         <attr name="maxHeightRatio" format="float" />
     </declare-styleable>
+
+    <declare-styleable name="AvatarCropView">
+        <attr name="shape_crop" format="enum">
+            <enum name="circle" value="0" />
+            <enum name="sexangle" value="1" />
+        </attr>
+    </declare-styleable>
+
 </resources>

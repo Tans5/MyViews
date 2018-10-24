@@ -1,49 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    android:layout_height="match_parent"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+    android:orientation="vertical">
 
-    <LinearLayout android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:orientation="vertical"
-        xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.tans.views.AvatarCropView
+        android:id="@+id/crop_view"
+        app:shape_crop="sexangle"
+        android:clickable="true"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:src="@drawable/test" />
 
-        <com.tans.views.SimplifiedViewPager
-            android:id="@+id/image_viewpager"
-            android:layout_width="match_parent"
-            android:layout_height="200dp" />
+    <com.tans.views.AvatarView
+        android:id="@+id/display_iv"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/test"
+        app:shape="sexangle"
+        app:border_width="2dp"
+        app:border_radius="4dp"
+        app:border_color="@color/colorPrimary"/>
 
-        <com.tans.views.AvatarView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/test" />
+    <Button
+        android:id="@+id/crop_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="crop" />
 
-        <com.tans.views.AvatarView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:shape="sexangle"
-            android:src="@drawable/test" />
-
-        <com.tans.views.AvatarView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/test"
-            app:border_width="2dp"
-            app:border_color="@android:color/background_dark" />
-
-        <com.tans.views.AvatarView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:shape="sexangle"
-            android:src="@drawable/test"
-            app:border_width="2dp"
-            app:border_color="@color/colorPrimaryDark"
-            app:border_radius="4dp" />
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>
