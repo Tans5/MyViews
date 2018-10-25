@@ -3,6 +3,7 @@ package com.tans.views
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -12,11 +13,7 @@ class AvatarCropView : ImageView {
 
     private lateinit var shape: Shape
 
-    private  var lastEventX: Float = 0f
-
-    private var lastEventY: Float = 0f
-
-    private var lastEventPointerId: Int = -1
+    private val eventHelper = EventHelper()
 
     private val gestureListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
@@ -65,18 +62,11 @@ class AvatarCropView : ImageView {
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val result = gestureDetector.onTouchEvent(event)
-        val pointerId = event.getPointerId1()
-        if (event.action == MotionEvent.ACTION_MOVE && result) {
-            val dx = if (pointerId != lastEventPointerId) 0f else event.getX1() - lastEventX
-            val dy = if (pointerId != lastEventPointerId) 0f else event.getY1() - lastEventY
+        eventHelper.eventUpdate(event) { dx, dy ->
             imageMatrix = imageMatrix.postTranslate1(dx, dy)
             invalidate()
         }
-        lastEventX = event.getX1()
-        lastEventY = event.getY1()
-        lastEventPointerId = pointerId
-        return result
+        return gestureDetector.onTouchEvent(event)
     }
 
     fun cropBitmap(): Bitmap {
@@ -89,6 +79,22 @@ class AvatarCropView : ImageView {
         canvas.drawColor(Color.TRANSPARENT)
         drawable.draw(canvas)
         return bitmap
+    }
+
+    fun fitCenterDisplay() {
+        post {
+            val bitmap: Bitmap = if (drawable is BitmapDrawable) {
+                (drawable as BitmapDrawable).bitmap
+            } else {
+                throw Throwable("Wrong drawable.")
+            }
+            val scale = calculateFitCenterScale(bitmap)
+            val matrix = Matrix()
+            matrix.setScale(scale.scale, scale.scale)
+            matrix.postTranslate(scale.offX, scale.offY)
+            imageMatrix = matrix
+            invalidate()
+        }
     }
 
     private fun initAttrs(typedArray: TypedArray? = null) {
@@ -155,6 +161,21 @@ class AvatarCropView : ImageView {
         return path
     }
 
+    private fun calculateFitCenterScale(bitmap: Bitmap): Scale {
+        val bWith = bitmap.width.toFloat()
+        val bHeight = bitmap.height.toFloat()
+        val mWith = measuredWidth.toFloat()
+        val mHeight = measuredHeight.toFloat()
+        val scale = if (bWith / bHeight > mWith / mHeight) {
+            mWith / bWith
+        } else {
+            mHeight / bHeight
+        }
+        val offX = (mWith - bWith * scale) / 2
+        val offY = (mHeight - bHeight * scale) / 2
+        return Scale(scale = scale, offX = offX, offY = offY)
+    }
+
     enum class Shape(val code: Int) {
         Circle(0),
         Sexangle(1);
@@ -170,12 +191,37 @@ class AvatarCropView : ImageView {
     private data class Sexangle(val points: List<Point>,
                                 val center: Point)
 
+    private data class Scale(val scale: Float,
+                             val offX: Float,
+                             val offY: Float)
+
+    private inner class EventHelper {
+
+        private  var lastEventX: Float = 0f
+
+        private var lastEventY: Float = 0f
+
+        private var lastEventPointerId: Int = -1
+
+        fun eventUpdate(event: MotionEvent, f: (Float, Float) -> Unit) {
+            val pointerId = event.getPointerId1()
+            if (event.action == MotionEvent.ACTION_MOVE) {
+                val dx = if (lastEventPointerId != pointerId) 0f else event.getX1() - lastEventX
+                val dy = if (lastEventPointerId != pointerId) 0f else event.getY1() - lastEventY
+                f(dx, dy)
+            }
+            lastEventPointerId = pointerId
+            lastEventX = event.getX1()
+            lastEventY = event.getY1()
+        }
+
+        private fun MotionEvent.getX1() = this.getX(0)
+
+        private fun MotionEvent.getY1() = this.getY(0)
+
+        private fun MotionEvent.getPointerId1() = this.getPointerId(0)
+    }
+
     private fun Matrix.postTranslate1(dx: Float, dy: Float): Matrix = this.apply { postTranslate(dx, dy) }
-
-    private fun MotionEvent.getX1() = this.getX(0)
-
-    private fun MotionEvent.getY1() = this.getY(0)
-
-    private fun MotionEvent.getPointerId1() = this.getPointerId(0)
 
 }

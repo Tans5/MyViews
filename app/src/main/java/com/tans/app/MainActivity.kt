@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val cropView = findViewById<AvatarCropView>(R.id.crop_view)
+        cropView.fitCenterDisplay()
         val displayView = findViewById<ImageView>(R.id.display_iv)
         findViewById<Button>(R.id.crop_bt).setOnClickListener { _ ->
             val bitmap = cropView.cropBitmap()
