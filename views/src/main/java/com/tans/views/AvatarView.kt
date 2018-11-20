@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.support.annotation.ColorInt
 import android.util.AttributeSet
 import android.widget.ImageView
@@ -31,7 +32,7 @@ class AvatarView : ImageView {
         val bitmap: Bitmap = if (drawable is BitmapDrawable) {
             (drawable as BitmapDrawable).bitmap
         } else {
-            throw Throwable("Wrong drawable.")
+            drawable.toBitmap()
         }
         val bitmapPaint = createBasePaint(createBaseBitmapShader(bitmap, calculateScale(bitmap)))
         val borderPaint = createBorderPaint(border)
@@ -161,5 +162,14 @@ class AvatarView : ImageView {
     enum class Shape(val code: Int) {
         Circle(0),
         Sexangle(1);
+    }
+
+    companion object {
+        fun Drawable.toBitmap(): Bitmap {
+            val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            draw(canvas)
+            return bitmap
+        }
     }
 }
