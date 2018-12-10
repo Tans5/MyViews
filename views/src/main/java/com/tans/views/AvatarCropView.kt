@@ -1,4 +1,4 @@
-package jp.co.rakuten.golf.gora2.ui.customview
+package com.tans.views
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -8,7 +8,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.widget.ImageView
-import com.tans.views.R
 import com.tans.views.extensions.*
 
 class AvatarCropView : ImageView {

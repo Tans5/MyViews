@@ -1,4 +1,4 @@
-package jp.co.rakuten.golf.gora2.ui.customview
+package com.tans.views
 
 import android.content.Context
 import android.graphics.drawable.Drawable
