@@ -1,4 +1,4 @@
-package com.tans.views
+package jp.co.rakuten.golf.gora2.ui.customview
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -8,14 +8,18 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.widget.ImageView
+import com.tans.views.R
+import com.tans.views.extensions.*
 
 class AvatarCropView : ImageView {
 
     private lateinit var shape: Shape
 
+    private var cacheData: CacheData? = null
+
     private val eventHelper = EventHelper()
 
-    private val gestureListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    private val gestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             imageMatrix = imageMatrix.apply {
                 postScale(detector.scaleFactor, detector.scaleFactor, detector.focusX, detector.focusX)
@@ -23,9 +27,7 @@ class AvatarCropView : ImageView {
             invalidate()
             return true
         }
-    }
-
-    private val gestureDetector = ScaleGestureDetector(context, gestureListener)
+    })
 
     constructor(context: Context) : super(context) {
         initAttrs()
@@ -40,25 +42,76 @@ class AvatarCropView : ImageView {
         initAttrs(context.obtainStyledAttributes(attrs, R.styleable.AvatarCropView))
     }
 
+    data class CacheData(
+            val width: Int, val height: Int,
+            val shadowRect: Rect,
+            val shapeDraw: ShapeDraw
+    ) {
+        fun onDraw(canvas: Canvas) {
+            val sc = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
+            canvas.drawRect(shadowRect, shadowPaint)
+            shapeDraw.onDraw(canvas)
+            canvas.restoreToCount(sc)
+        }
+
+        companion object {
+            val shadowPaint = createShadowPaint()
+
+            fun create(width: Int, height: Int, shapeDraw: ShapeDraw): CacheData = CacheData(
+                    width = width, height = height,
+                    shadowRect = createShadowRect(width, height),
+                    shapeDraw = shapeDraw)
+        }
+    }
+
+    sealed class ShapeDraw {
+        abstract fun onDraw(canvas: Canvas)
+
+        class CircleShape(val circle: Circle) : ShapeDraw() {
+            override fun onDraw(canvas: Canvas) {
+                canvas.drawCircle(circle.x, circle.y, circle.radius, cropPaint)
+                canvas.drawCircle(circle.x, circle.y, circle.radius, cropBorderPaint)
+            }
+        }
+
+        class SexangleShape(val sexanglePath: Path) : ShapeDraw() {
+            override fun onDraw(canvas: Canvas) {
+                canvas.drawPath(sexanglePath, cropPaint)
+                canvas.drawPath(sexanglePath, cropBorderPaint)
+            }
+
+        }
+
+        companion object {
+            val cropPaint = createCropPaint()
+            val cropBorderPaint = createCropBorderPaint()
+
+            fun circle(width: Int, height: Int): CircleShape =
+                    CircleShape(createBaseCircle(width, height))
+
+            fun sexangle(width: Int, height: Int): SexangleShape =
+                    SexangleShape(createSexanglePath(calculateSexangle(
+                            baseCircle = createBaseCircle(width, height),
+                            width = width.toFloat(), height = height.toFloat())))
+        }
+    }
+
+    private fun refreshCacheData(width: Int, height: Int) {
+        cacheData = CacheData.create(width, height,
+                when (shape) {
+                    Shape.Circle -> ShapeDraw.circle(width, height)
+                    Shape.Sexangle -> ShapeDraw.sexangle(width, height)
+                })
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        refreshCacheData(w, h)
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val width = measuredWidth
-        val height = measuredHeight
-        val baseCircle = createBaseCircle(width, height)
-
-        val sc = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
-        canvas.drawRect(createShadowRect(width, height), createShadowPaint())
-        if (shape == Shape.Circle) {
-            canvas.drawCircle(baseCircle.x, baseCircle.y, baseCircle.radius, createCropPaint())
-            canvas.drawCircle(baseCircle.x, baseCircle.y, baseCircle.radius, createCropBorderPaint())
-        } else {
-            val sexanglePath = createSexanglePath(calculateSexangle(baseCircle))
-            canvas.drawPath(sexanglePath, createCropPaint())
-            canvas.drawPath(sexanglePath, createCropBorderPaint())
-        }
-        canvas.restoreToCount(sc)
-
-
+        cacheData?.onDraw(canvas)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -73,9 +126,9 @@ class AvatarCropView : ImageView {
         val width = measuredWidth.toFloat()
         val height = measuredHeight.toFloat()
         val a = Math.min(width, height)
-        val bitmap = Bitmap.createBitmap(a.toInt(), a.toInt(), Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(a.toInt(), a.toInt(), Bitmap.Config.RGB_565)
         val canvas = Canvas(bitmap)
-        canvas.matrix = imageMatrix.postTranslate1((width - a) / 2, (height - a) / 2)
+        canvas.matrix = imageMatrix.postTranslate1(-(width - a) / 2, -(height - a) / 2)
         canvas.drawColor(Color.TRANSPARENT)
         drawable.draw(canvas)
         return bitmap
@@ -86,7 +139,7 @@ class AvatarCropView : ImageView {
             val bitmap: Bitmap = if (drawable is BitmapDrawable) {
                 (drawable as BitmapDrawable).bitmap
             } else {
-                throw Throwable("Wrong drawable.")
+                drawable.toBitmap()
             }
             val scale = calculateFitCenterScale(bitmap)
             val matrix = Matrix()
@@ -101,64 +154,7 @@ class AvatarCropView : ImageView {
         shape = Shape.values().find { it.code == typedArray?.getInt(R.styleable.AvatarCropView_shape_crop, 0) } ?: Shape.Circle
         typedArray?.recycle()
         scaleType = ScaleType.MATRIX
-    }
-
-    private fun createBasePaint(): Paint = Paint().apply {
-        isAntiAlias = true
-    }
-
-    private fun createShadowPaint(): Paint = createBasePaint().apply {
-        setARGB(80, 50, 50, 50)
-        style = Paint.Style.FILL
-    }
-
-    private fun createCropPaint(): Paint = createBasePaint().apply {
-        color = Color.TRANSPARENT
-        style = Paint.Style.FILL
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
-    }
-
-    private fun createCropBorderPaint(): Paint = createBasePaint().apply {
-        color = Color.WHITE
-        style = Paint.Style.STROKE
-        strokeWidth = 2f
-    }
-
-    private fun createBaseCircle(width: Int, height: Int): Circle =
-            Circle(x = width.toFloat() / 2,
-                    y = height.toFloat() / 2,
-                    radius = (if (width > height) height.toFloat() / 2 else width.toFloat() / 2) - 5)
-
-    private fun createShadowRect(width: Int, height: Int): Rect = Rect(0, 0 , width, height)
-
-    private fun calculateSexangle(baseCircle: Circle): Sexangle {
-        val width = measuredWidth.toFloat()
-        val height = measuredHeight.toFloat()
-        val r = baseCircle.radius
-        val cosR = (Math.sqrt(3.toDouble()) * r / 2).toFloat()
-        val center = Point(x = baseCircle.x, y = baseCircle.y)
-        val point0 = Point(x = width / 2 - r / 2, y = height / 2 - cosR)
-        val point1 = Point(x = width / 2 + r / 2, y = height / 2 - cosR)
-        val point2 = Point(x = width / 2 + r, y = height / 2)
-        val point3 = Point(x = width / 2 + r / 2, y = height / 2 + cosR)
-        val point4 = Point(x = width / 2 - r / 2, y = height / 2 + cosR)
-        val point5 = Point(x = width / 2 - r, y = height / 2)
-        val points = listOf(point0, point1, point2, point3, point4, point5)
-        return Sexangle(points, center)
-    }
-
-    private fun createSexanglePath(sexangle: Sexangle): Path {
-        val path = Path()
-        val points = sexangle.points
-        path.moveTo(points[0].x, points[0].y)
-        path.lineTo(points[1].x, points[1].y)
-        path.lineTo(points[2].x, points[2].y)
-        path.lineTo(points[3].x, points[3].y)
-        path.lineTo(points[4].x, points[4].y)
-        path.lineTo(points[5].x, points[5].y)
-        path.lineTo(points[0].x, points[0].y)
-        path.close()
-        return path
+        refreshCacheData(measuredWidth, measuredHeight)
     }
 
     private fun calculateFitCenterScale(bitmap: Bitmap): Scale {
@@ -176,25 +172,6 @@ class AvatarCropView : ImageView {
         return Scale(scale = scale, offX = offX, offY = offY)
     }
 
-    enum class Shape(val code: Int) {
-        Circle(0),
-        Sexangle(1);
-    }
-
-    private data class Point(val x: Float,
-                             val y: Float)
-
-    private data class Circle(val x: Float,
-                              val y: Float,
-                              val radius: Float)
-
-    private data class Sexangle(val points: List<Point>,
-                                val center: Point)
-
-    private data class Scale(val scale: Float,
-                             val offX: Float,
-                             val offY: Float)
-
     private inner class EventHelper {
 
         private  var lastEventX: Float = 0f
@@ -203,7 +180,7 @@ class AvatarCropView : ImageView {
 
         private var lastEventPointerId: Int = -1
 
-        fun eventUpdate(event: MotionEvent, f: (Float, Float) -> Unit) {
+        inline fun eventUpdate(event: MotionEvent, f: (Float, Float) -> Unit) {
             val pointerId = event.getPointerId1()
             if (event.action == MotionEvent.ACTION_MOVE) {
                 val dx = if (lastEventPointerId != pointerId) 0f else event.getX1() - lastEventX
@@ -222,6 +199,36 @@ class AvatarCropView : ImageView {
         private fun MotionEvent.getPointerId1() = this.getPointerId(0)
     }
 
-    private fun Matrix.postTranslate1(dx: Float, dy: Float): Matrix = this.apply { postTranslate(dx, dy) }
+    companion object {
+        private fun Matrix.postTranslate1(dx: Float, dy: Float): Matrix = this.apply { postTranslate(dx, dy) }
+
+        private fun createBasePaint(): Paint = Paint().apply {
+            isAntiAlias = true
+        }
+
+        private fun createShadowPaint(): Paint = createBasePaint().apply {
+            setARGB(80, 50, 50, 50)
+            style = Paint.Style.FILL
+        }
+
+        private fun createCropPaint(): Paint = createBasePaint().apply {
+            color = Color.TRANSPARENT
+            style = Paint.Style.FILL
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+        }
+
+        private fun createCropBorderPaint(): Paint = createBasePaint().apply {
+            color = Color.WHITE
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+        }
+
+        private fun createBaseCircle(width: Int, height: Int): Circle =
+                Circle(x = width.toFloat() / 2,
+                        y = height.toFloat() / 2,
+                        radius = (if (width > height) height.toFloat() / 2 else width.toFloat() / 2) - 5)
+
+        private fun createShadowRect(width: Int, height: Int): Rect = Rect(0, 0 , width, height)
+    }
 
 }
