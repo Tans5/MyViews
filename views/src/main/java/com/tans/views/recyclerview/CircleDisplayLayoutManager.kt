@@ -1,4 +1,4 @@
-package com.tans.views
+package com.tans.views.recyclerview
 
 import android.support.v7.widget.OrientationHelper
 import android.support.v7.widget.RecyclerView
