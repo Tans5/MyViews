@@ -2,7 +2,7 @@ package com.tans.views
 
 import android.content.Context
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import android.util.AttributeSet
 import android.util.Pair
 import android.view.View

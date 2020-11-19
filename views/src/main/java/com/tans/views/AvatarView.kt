@@ -5,13 +5,14 @@ import android.content.res.TypedArray
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
-import android.support.annotation.ColorInt
-import android.support.annotation.RequiresApi
+import androidx.annotation.ColorInt
+import androidx.annotation.RequiresApi
 import android.util.AttributeSet
 import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 import com.tans.views.extensions.*
 
-class AvatarView : ImageView {
+class AvatarView : AppCompatImageView {
 
     private lateinit var shape: Shape
 
@@ -37,11 +38,6 @@ class AvatarView : ImageView {
     }
 
     constructor(context: Context, attrs: AttributeSet, attrsStyle: Int) : super(context, attrs, attrsStyle) {
-        initAttrs(context.obtainStyledAttributes(attrs, R.styleable.AvatarView))
-    }
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    constructor(context: Context, attrs: AttributeSet, attrsStyle: Int, attrsStyleRes: Int) : super(context, attrs, attrsStyle, attrsStyleRes) {
         initAttrs(context.obtainStyledAttributes(attrs, R.styleable.AvatarView))
     }
 

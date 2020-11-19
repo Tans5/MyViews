@@ -1,21 +1,21 @@
 package com.tans.views.recyclerview
 
-import android.support.v7.widget.OrientationHelper
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.OrientationHelper
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 
-class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
+class CircleDisplayLayoutManager() : androidx.recyclerview.widget.RecyclerView.LayoutManager() {
     val orientation: Orientation = Orientation.VERTICAL
     private val orientationHelper = when (orientation) {
-        Orientation.HORIZONTAL -> OrientationHelper.createHorizontalHelper(this)
-        Orientation.VERTICAL -> OrientationHelper.createVerticalHelper(this)
+        Orientation.HORIZONTAL -> androidx.recyclerview.widget.OrientationHelper.createHorizontalHelper(this)
+        Orientation.VERTICAL -> androidx.recyclerview.widget.OrientationHelper.createVerticalHelper(this)
     }
 
     private val layoutState: LayoutState by lazy { LayoutState(available = orientationHelper.totalSpace) }
 
     override fun isAutoMeasureEnabled(): Boolean = true
 
-    override fun scrollVerticallyBy(dy: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State): Int {
+    override fun scrollVerticallyBy(dy: Int, recycler: androidx.recyclerview.widget.RecyclerView.Recycler, state: androidx.recyclerview.widget.RecyclerView.State): Int {
         val scrollOrientation = if (dy >= 0) ScrollOrientation.END else ScrollOrientation.START
         val consumedSize = fillChildren(recycler, state, scrollOrientation, Math.abs(dy), false)
         val consumedY = if (scrollOrientation == ScrollOrientation.END) consumedSize else -consumedSize
@@ -28,11 +28,11 @@ class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
         return consumedY
     }
 
-    override fun scrollHorizontallyBy(dx: Int, recycler: RecyclerView.Recycler?, state: RecyclerView.State?): Int {
+    override fun scrollHorizontallyBy(dx: Int, recycler: androidx.recyclerview.widget.RecyclerView.Recycler?, state: androidx.recyclerview.widget.RecyclerView.State?): Int {
         return super.scrollHorizontallyBy(dx, recycler, state)
     }
 
-    override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
+    override fun onLayoutChildren(recycler: androidx.recyclerview.widget.RecyclerView.Recycler, state: androidx.recyclerview.widget.RecyclerView.State) {
         if (state.itemCount <= 0) {
             removeAndRecycleAllViews(recycler)
         } else {
@@ -46,8 +46,8 @@ class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
     override fun canScrollVertically(): Boolean = orientation == Orientation.VERTICAL
 
     override fun generateDefaultLayoutParams()
-            : RecyclerView.LayoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
-            RecyclerView.LayoutParams.MATCH_PARENT)
+            : androidx.recyclerview.widget.RecyclerView.LayoutParams = androidx.recyclerview.widget.RecyclerView.LayoutParams(androidx.recyclerview.widget.RecyclerView.LayoutParams.MATCH_PARENT,
+            androidx.recyclerview.widget.RecyclerView.LayoutParams.MATCH_PARENT)
 
     private fun initLayoutState() {
         layoutState.available = orientationHelper.endAfterPadding
@@ -80,8 +80,8 @@ class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
         }
     }
 
-    private fun fillChildren(recycler: RecyclerView.Recycler,
-                             state: RecyclerView.State,
+    private fun fillChildren(recycler: androidx.recyclerview.widget.RecyclerView.Recycler,
+                             state: androidx.recyclerview.widget.RecyclerView.State,
                              scrollOrientation: ScrollOrientation,
                              requestSize: Int,
                              needInitLayoutState: Boolean): Int {
@@ -120,7 +120,7 @@ class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
         }
     }
 
-    private fun recycleFromStart(consumedSize: Int, recycler: RecyclerView.Recycler) {
+    private fun recycleFromStart(consumedSize: Int, recycler: androidx.recyclerview.widget.RecyclerView.Recycler) {
         val itemCount = itemCount
         for (i in 0 until itemCount) {
             val view = getChildAt(i)
@@ -132,7 +132,7 @@ class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
         }
     }
 
-    private fun recycleFromEnd(consumedSize: Int, recycler: RecyclerView.Recycler) {
+    private fun recycleFromEnd(consumedSize: Int, recycler: androidx.recyclerview.widget.RecyclerView.Recycler) {
         val itemCount = itemCount
         for (i in (0 until itemCount).reversed()) {
             val view = getChildAt(i)
@@ -234,7 +234,7 @@ class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
                                var offset: Int = 0,
                                var scrollOrientation: ScrollOrientation = ScrollOrientation.END) {
 
-            fun hasMore(state: RecyclerView.State): Boolean {
+            fun hasMore(state: androidx.recyclerview.widget.RecyclerView.State): Boolean {
                 return if (scrollOrientation == ScrollOrientation.START) {
                     position - 1 in 0 until  state.itemCount
                 } else {
@@ -242,7 +242,7 @@ class CircleDisplayLayoutManager() : RecyclerView.LayoutManager() {
                 }
             }
 
-            fun next(recycler: RecyclerView.Recycler): View? {
+            fun next(recycler: androidx.recyclerview.widget.RecyclerView.Recycler): View? {
                 return if (scrollOrientation == ScrollOrientation.START) {
                     recycler.getViewForPosition(position - 1)
                 } else {

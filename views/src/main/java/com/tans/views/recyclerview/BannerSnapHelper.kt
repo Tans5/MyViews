@@ -1,23 +1,23 @@
 package com.tans.views.recyclerview
 
-import android.support.v7.widget.LinearSnapHelper
-import android.support.v7.widget.OrientationHelper
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearSnapHelper
+import androidx.recyclerview.widget.OrientationHelper
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 
-class BannerSnapHelper : LinearSnapHelper() {
+class BannerSnapHelper : androidx.recyclerview.widget.LinearSnapHelper() {
 
-    private var orientationHelper: OrientationHelper? = null
+    private var orientationHelper: androidx.recyclerview.widget.OrientationHelper? = null
 
-    override fun calculateDistanceToFinalSnap(layoutManager: RecyclerView.LayoutManager, targetView: View): IntArray? {
+    override fun calculateDistanceToFinalSnap(layoutManager: androidx.recyclerview.widget.RecyclerView.LayoutManager, targetView: View): IntArray? {
         val start = orientationHelper?.startAfterPadding ?: 0
         val dLeft = orientationHelper?.getDecoratedStart(targetView) ?: 0
         return arrayOf(dLeft - start, 0).toIntArray()
     }
 
-    override fun findSnapView(layoutManager: RecyclerView.LayoutManager): View? {
+    override fun findSnapView(layoutManager: androidx.recyclerview.widget.RecyclerView.LayoutManager): View? {
         if (orientationHelper == null) {
-            orientationHelper = OrientationHelper.createHorizontalHelper(layoutManager)
+            orientationHelper = androidx.recyclerview.widget.OrientationHelper.createHorizontalHelper(layoutManager)
         }
         val start = orientationHelper?.startAfterPadding ?: 0
         val childCount = layoutManager.childCount

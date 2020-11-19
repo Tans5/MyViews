@@ -1,14 +1,14 @@
 package com.tans.views.recyclerview
 
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 
-class BannerLayoutManager(context: Context) : LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false) {
+class BannerLayoutManager(context: Context) : androidx.recyclerview.widget.LinearLayoutManager(context, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false) {
 
     override fun measureChildWithMargins(child: View, widthUsed: Int, heightUsed: Int) {
-        val lp = child.layoutParams as RecyclerView.LayoutParams
+        val lp = child.layoutParams as androidx.recyclerview.widget.RecyclerView.LayoutParams
         val widthSpec = getChildMeasureSpec(this.width / 2,
                 this.widthMode,
                 this.paddingLeft + this.paddingRight + lp.leftMargin + lp.rightMargin + widthUsed,

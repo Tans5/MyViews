@@ -7,10 +7,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
-import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 import com.tans.views.extensions.*
 
-class AvatarCropView : ImageView {
+class AvatarCropView : AppCompatImageView {
 
     private lateinit var shape: Shape
 
@@ -35,9 +35,6 @@ class AvatarCropView : ImageView {
         initAttrs(context.obtainStyledAttributes(attrs, R.styleable.AvatarCropView))
     }
     constructor(context: Context, attrs: AttributeSet, attrsStyle: Int) : super(context, attrs, attrsStyle) {
-        initAttrs(context.obtainStyledAttributes(attrs, R.styleable.AvatarCropView))
-    }
-    constructor(context: Context, attrs: AttributeSet, attrsStyle: Int, attrsStyleRes: Int) : super(context, attrs, attrsStyle, attrsStyleRes) {
         initAttrs(context.obtainStyledAttributes(attrs, R.styleable.AvatarCropView))
     }
 

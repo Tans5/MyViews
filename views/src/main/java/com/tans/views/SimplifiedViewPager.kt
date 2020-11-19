@@ -3,9 +3,9 @@ package com.tans.views
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.support.annotation.RequiresApi
-import android.support.v4.view.PagerAdapter
-import android.support.v4.view.ViewPager
+import androidx.annotation.RequiresApi
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
@@ -16,8 +16,8 @@ import android.widget.RadioButton
 
 class SimplifiedViewPager : FrameLayout {
 
-    private val viewPager: ViewPager by lazy {
-        ViewPager(context).apply {
+    private val viewPager: androidx.viewpager.widget.ViewPager by lazy {
+        androidx.viewpager.widget.ViewPager(context).apply {
             overScrollMode = ViewGroup.OVER_SCROLL_NEVER
             layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
             this@SimplifiedViewPager.addView(this)
@@ -46,7 +46,7 @@ class SimplifiedViewPager : FrameLayout {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         viewPager.adapter = ImageViewPagerAdapter()
-        viewPager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener {
+        viewPager.addOnPageChangeListener(object: androidx.viewpager.widget.ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(p0: Int) {
                 events?.pageScrollStateChanged?.invoke(p0)
             }
@@ -108,7 +108,7 @@ class SimplifiedViewPager : FrameLayout {
                         gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
                     }
 
-    inner class ImageViewPagerAdapter : PagerAdapter() {
+    inner class ImageViewPagerAdapter : androidx.viewpager.widget.PagerAdapter() {
 
         override fun isViewFromObject(p0: View, p1: Any): Boolean = p0 == p1
 
