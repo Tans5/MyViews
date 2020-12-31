@@ -124,7 +124,7 @@ class AvatarCropView : AppCompatImageView {
         val a = Math.min(width, height)
         val bitmap = Bitmap.createBitmap(a.toInt(), a.toInt(), Bitmap.Config.RGB_565)
         val canvas = Canvas(bitmap)
-        canvas.matrix = imageMatrix.postTranslate1(-(width - a) / 2, -(height - a) / 2)
+        canvas.setMatrix(imageMatrix.postTranslate1(-(width - a) / 2, -(height - a) / 2))
         canvas.drawColor(Color.TRANSPARENT)
         drawable.draw(canvas)
         return bitmap
