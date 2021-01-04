@@ -16,26 +16,26 @@ class FreeScrollView : FrameLayout {
     private val scroller: OverScroller by lazy { OverScroller(context) }
 
     private val scrollListener: GestureScrollListener = { dX, dY ->
-        val (rangeX, rangeY) = getScrollRange()
-        scrollXY(dX = dX.toInt(),
-                scrolledX = scrollX,
-                rangeX = rangeX,
-                dY = dY.toInt(),
-                scrolledY = scrollY,
-                rangeY = rangeY)
         println("DX: $dX, DY: $dY")
+//        val (rangeX, rangeY) = getScrollRange()
+//        scrollXY(dX = dX.toInt(),
+//                scrolledX = scrollX,
+//                rangeX = rangeX,
+//                dY = dY.toInt(),
+//                scrolledY = scrollY,
+//                rangeY = rangeY)
         true
     }
 
     private val flingListener: GestureFlingListener = { vX, vY ->
         println("VX: $vX, VY: $vY")
-        scroller.fling(
-                scrollX, scrollY,
-                vX.toInt(), vY.toInt(),
-                Int.MIN_VALUE, Int.MAX_VALUE,
-                Int.MIN_VALUE, Int.MAX_VALUE
-        )
-        ViewCompat.postInvalidateOnAnimation(this)
+//        scroller.fling(
+//                scrollX, scrollY,
+//                vX.toInt(), vY.toInt(),
+//                Int.MIN_VALUE, Int.MAX_VALUE,
+//                Int.MIN_VALUE, Int.MAX_VALUE
+//        )
+//        ViewCompat.postInvalidateOnAnimation(this)
         true
     }
 
@@ -168,8 +168,8 @@ class FreeScrollView : FrameLayout {
                 val child = getChildAt(0)
                 val lp = child.layoutParams as? MarginLayoutParams
                 if (lp != null) {
-                    val childWidth = lp.width + lp.marginStart + lp.marginEnd
-                    val childHeight = lp.height + lp.topMargin + lp.bottomMargin
+                    val childWidth = child.width + lp.marginStart + lp.marginEnd
+                    val childHeight = child.height + lp.topMargin + lp.bottomMargin
                     val meWidth = width - paddingStart - paddingEnd
                     val meHeight = height - paddingTop - paddingBottom
                     max(0, childWidth - meWidth) to max(0, childHeight - meHeight)
