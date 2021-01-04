@@ -154,6 +154,7 @@ class FreeScrollView : FrameLayout {
                 newScrollY
             }
         }
+        println("Scroll to: X: $newXFixed, Y: $newYFixed")
         scrollTo(newXFixed, newYFixed)
     }
 
@@ -168,8 +169,8 @@ class FreeScrollView : FrameLayout {
                 val child = getChildAt(0)
                 val lp = child.layoutParams as? MarginLayoutParams
                 if (lp != null) {
-                    val childWidth = lp.width + lp.marginStart + lp.marginEnd
-                    val childHeight = lp.height + lp.topMargin + lp.bottomMargin
+                    val childWidth = child.width + lp.marginStart + lp.marginEnd
+                    val childHeight = child.height + lp.topMargin + lp.bottomMargin
                     val meWidth = width - paddingStart - paddingEnd
                     val meHeight = height - paddingTop - paddingBottom
                     max(0, childWidth - meWidth) to max(0, childHeight - meHeight)
