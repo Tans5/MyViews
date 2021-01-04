@@ -56,7 +56,7 @@ class GestureDetector(
             MotionEvent.ACTION_MOVE -> {
                 val newX = event.getX(activeIndex)
                 val newY = event.getY(activeIndex)
-                val dX = newX - lastY
+                val dX = newX - lastX
                 val dY = newY - lastY
                 lastX = newX
                 lastY = newY
@@ -81,8 +81,8 @@ class GestureDetector(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 if (actionMasked == MotionEvent.ACTION_UP) {
                     velocityTracker?.computeCurrentVelocity(1000, maxVelocity)
-                    val vX = velocityTracker?.xVelocity ?: 0f
-                    val vY = velocityTracker?.yVelocity ?: 0f
+                    val vX = velocityTracker?.getXVelocity(activeScrollId) ?: 0f
+                    val vY = velocityTracker?.getYVelocity(activeScrollId) ?: 0f
                     handled = if (vX.absoluteValue > minVelocity || vY.absoluteValue > minVelocity) {
                         gestureFlingListener?.invoke(vX, vY) ?: false
                     } else {
