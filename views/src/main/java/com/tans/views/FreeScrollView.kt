@@ -4,11 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.OverScroller
 import androidx.core.view.ViewCompat
 import kotlin.math.max
-import kotlin.math.min
 
 class FreeScrollView : FrameLayout {
 
@@ -31,8 +32,8 @@ class FreeScrollView : FrameLayout {
         scroller.fling(
                 scrollX, scrollY,
                 vX.toInt(), vY.toInt(),
-                0, Int.MAX_VALUE,
-                0, Int.MAX_VALUE
+                Int.MIN_VALUE, Int.MAX_VALUE,
+                Int.MIN_VALUE, Int.MAX_VALUE
         )
         ViewCompat.postInvalidateOnAnimation(this)
         true
@@ -45,6 +46,11 @@ class FreeScrollView : FrameLayout {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, attrsStyle: Int) : super(context, attrs, attrsStyle)
+
+    init {
+        isClickable = true
+        isFocusable = true
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -86,6 +92,37 @@ class FreeScrollView : FrameLayout {
         }
     }
 
+    override fun generateLayoutParams(lp: ViewGroup.LayoutParams?): ViewGroup.LayoutParams {
+        return MarginLayoutParams(lp)
+    }
+
+    override fun measureChild(
+            child: View?,
+            parentWidthMeasureSpec: Int,
+            parentHeightMeasureSpec: Int
+    ) {
+        if (child != null) {
+            val childWidthSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+            val childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+            child.measure(childWidthSpec, childHeightSpec)
+        }
+    }
+
+    override fun measureChildWithMargins(
+            child: View?,
+            parentWidthMeasureSpec: Int,
+            widthUsed: Int,
+            parentHeightMeasureSpec: Int,
+            heightUsed: Int
+    ) {
+        if (child != null) {
+            val lp = child.layoutParams as MarginLayoutParams
+            val childWidthSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin, MeasureSpec.UNSPECIFIED)
+            val childHeightSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin, MeasureSpec.UNSPECIFIED)
+            child.measure(childWidthSpec, childHeightSpec)
+        }
+    }
+
     private fun scrollXY(
             dX: Int,
             scrolledX: Int,
@@ -93,9 +130,31 @@ class FreeScrollView : FrameLayout {
             dY: Int,
             scrolledY: Int,
             rangeY: Int) {
-        val newScrollX = dX + scrolledX
-        val newScrollY = dY + scrolledY
-        scrollTo(min(newScrollX, rangeX), min(newScrollY, rangeY))
+        val newScrollX = -dX + scrolledX
+        val newScrollY = -dY + scrolledY
+        val newXFixed = when {
+            newScrollX < 0 -> {
+                0
+            }
+            newScrollX > rangeX -> {
+                rangeX
+            }
+            else -> {
+                newScrollX
+            }
+        }
+        val newYFixed = when {
+            newScrollY < 0 -> {
+                0
+            }
+            newScrollY > rangeY -> {
+                rangeY
+            }
+            else -> {
+                newScrollY
+            }
+        }
+        scrollTo(newXFixed, newYFixed)
     }
 
     private fun getScrollRange(): Pair<Int, Int> {
