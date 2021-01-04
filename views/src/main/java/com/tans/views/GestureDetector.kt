@@ -63,15 +63,15 @@ class GestureDetector(
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val newX = event.getX(activeIndex)
-                val newY = event.getY(activeIndex)
+                val newX = event.getX(event.findPointerIndex(activeScrollId))
+                val newY = event.getY(event.findPointerIndex(activeScrollId))
                 if (gestureScrollListener != null) {
                     if (!isDragged) {
-                        val dX = newX - initX
-                        val dY = newY - initY
-                        handled = if ((dX.absoluteValue > touchSlop || dY.absoluteValue > touchSlop)) {
+                        val dIX = newX - initX
+                        val dIY = newY - initY
+                        handled = if ((dIX.absoluteValue > touchSlop || dIY.absoluteValue > touchSlop)) {
                             isDragged = true
-                            gestureScrollListener.invoke(dX, dY)
+                            gestureScrollListener.invoke(newX - lastX, newY - lastY)
                         } else {
                             false
                         }
