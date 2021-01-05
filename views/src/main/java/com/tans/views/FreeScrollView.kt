@@ -2,6 +2,7 @@ package com.tans.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -16,26 +17,26 @@ class FreeScrollView : FrameLayout {
     private val scroller: OverScroller by lazy { OverScroller(context) }
 
     private val scrollListener: GestureScrollListener = { dX, dY ->
-        val (rangeX, rangeY) = getScrollRange()
-        scrollXY(dX = dX.toInt(),
-                scrolledX = scrollX,
-                rangeX = rangeX,
-                dY = dY.toInt(),
-                scrolledY = scrollY,
-                rangeY = rangeY)
         println("DX: $dX, DY: $dY")
+//        val (rangeX, rangeY) = getScrollRange()
+//        scrollXY(dX = dX.toInt(),
+//                scrolledX = scrollX,
+//                rangeX = rangeX,
+//                dY = dY.toInt(),
+//                scrolledY = scrollY,
+//                rangeY = rangeY)
         true
     }
 
     private val flingListener: GestureFlingListener = { vX, vY ->
-        println("VX: $vX, VY: $vY")
-        scroller.fling(
-                scrollX, scrollY,
-                vX.toInt(), vY.toInt(),
-                Int.MIN_VALUE, Int.MAX_VALUE,
-                Int.MIN_VALUE, Int.MAX_VALUE
-        )
-        ViewCompat.postInvalidateOnAnimation(this)
+//        println("VX: $vX, VY: $vY")
+//        scroller.fling(
+//                scrollX, scrollY,
+//                vX.toInt(), vY.toInt(),
+//                Int.MIN_VALUE, Int.MAX_VALUE,
+//                Int.MIN_VALUE, Int.MAX_VALUE
+//        )
+//        ViewCompat.postInvalidateOnAnimation(this)
         true
     }
 
@@ -50,6 +51,11 @@ class FreeScrollView : FrameLayout {
     init {
         isClickable = true
         isFocusable = true
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            setOnScrollChangeListener { view, newX, newY, oldX, oldY ->
+//                println("NewX: $newX, NewY: $newY, OldX: $oldX, OldY: $oldY")
+//            }
+//        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -102,8 +108,9 @@ class FreeScrollView : FrameLayout {
             parentHeightMeasureSpec: Int
     ) {
         if (child != null) {
-            val childWidthSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
-            val childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+            val lp = child.layoutParams as MarginLayoutParams
+            val childWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.UNSPECIFIED)
+            val childHeightSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.UNSPECIFIED)
             child.measure(childWidthSpec, childHeightSpec)
         }
     }
@@ -117,8 +124,8 @@ class FreeScrollView : FrameLayout {
     ) {
         if (child != null) {
             val lp = child.layoutParams as MarginLayoutParams
-            val childWidthSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin, MeasureSpec.UNSPECIFIED)
-            val childHeightSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin, MeasureSpec.UNSPECIFIED)
+            val childWidthSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin + lp.width, MeasureSpec.EXACTLY)
+            val childHeightSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin + lp.height, MeasureSpec.EXACTLY)
             child.measure(childWidthSpec, childHeightSpec)
         }
     }
@@ -154,7 +161,8 @@ class FreeScrollView : FrameLayout {
                 newScrollY
             }
         }
-        println("Scroll to: X: $newXFixed, Y: $newYFixed")
+
+        println("DX: $dX, scrolledX: $scrolledX, rangeX: $rangeX, dY: $dY, scrolledY: $scrolledY, rangeY: $rangeY, newFixedX: $newXFixed, newFixed: $newYFixed")
         scrollTo(newXFixed, newYFixed)
     }
 

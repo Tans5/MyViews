@@ -18,6 +18,9 @@ class GestureDetector(
 
     private var lastX: Float = 0f
     private var lastY: Float = 0f
+    private var initX: Float = 0f
+    private var initY: Float = 0f
+    private var isDragged: Boolean = false
     private var activeScrollId: Int = -1
 
     private val viewConfiguration: ViewConfiguration by lazy { ViewConfiguration.get(context) }
@@ -43,6 +46,9 @@ class GestureDetector(
             MotionEvent.ACTION_DOWN -> {
                 lastX = event.getX(0)
                 lastY = event.getY(0)
+                initX = lastX
+                initY = lastY
+                isDragged = false
                 activeScrollId = event.getPointerId(0)
             }
 
@@ -51,20 +57,32 @@ class GestureDetector(
                 activeScrollId = event.getPointerId(activeIndex)
                 lastX = event.getX(activeIndex)
                 lastY = event.getY(activeIndex)
+                initX = lastX
+                initY = lastY
+                isDragged = false
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val newX = event.getX(activeIndex)
-                val newY = event.getY(activeIndex)
-                val dX = newX - lastX
-                val dY = newY - lastY
+                val newX = event.getX(event.findPointerIndex(activeScrollId))
+                val newY = event.getY(event.findPointerIndex(activeScrollId))
+                if (gestureScrollListener != null) {
+                    if (!isDragged) {
+                        val dIX = newX - initX
+                        val dIY = newY - initY
+                        handled = if ((dIX.absoluteValue > touchSlop || dIY.absoluteValue > touchSlop)) {
+                            isDragged = true
+                            gestureScrollListener.invoke(newX - lastX, newY - lastY)
+                        } else {
+                            false
+                        }
+                    } else {
+                        val dX = newX - lastX
+                        val dY = newY - lastY
+                        gestureScrollListener.invoke(dX, dY)
+                    }
+                }
                 lastX = newX
                 lastY = newY
-                handled = if (dX.absoluteValue > touchSlop || dY.absoluteValue > touchSlop) {
-                    gestureScrollListener?.invoke(dX, dY) ?: false
-                } else {
-                    false
-                }
             }
 
             MotionEvent.ACTION_POINTER_UP -> {
