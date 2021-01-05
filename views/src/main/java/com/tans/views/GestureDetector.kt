@@ -95,6 +95,9 @@ class GestureDetector(
                 activeScrollId = event.findPointerIndex(newIndex)
                 lastX = event.getX(newIndex)
                 lastY = event.getY(newIndex)
+                initX = lastX
+                initY = lastY
+                isDragged = false
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 if (actionMasked == MotionEvent.ACTION_UP) {

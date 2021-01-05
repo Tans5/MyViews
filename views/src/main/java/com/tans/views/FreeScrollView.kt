@@ -18,25 +18,25 @@ class FreeScrollView : FrameLayout {
 
     private val scrollListener: GestureScrollListener = { dX, dY ->
         println("DX: $dX, DY: $dY")
-//        val (rangeX, rangeY) = getScrollRange()
-//        scrollXY(dX = dX.toInt(),
-//                scrolledX = scrollX,
-//                rangeX = rangeX,
-//                dY = dY.toInt(),
-//                scrolledY = scrollY,
-//                rangeY = rangeY)
+        val (rangeX, rangeY) = getScrollRange()
+        scrollXY(dX = dX.toInt(),
+                scrolledX = scrollX,
+                rangeX = rangeX,
+                dY = dY.toInt(),
+                scrolledY = scrollY,
+                rangeY = rangeY)
         true
     }
 
     private val flingListener: GestureFlingListener = { vX, vY ->
-//        println("VX: $vX, VY: $vY")
-//        scroller.fling(
-//                scrollX, scrollY,
-//                vX.toInt(), vY.toInt(),
-//                Int.MIN_VALUE, Int.MAX_VALUE,
-//                Int.MIN_VALUE, Int.MAX_VALUE
-//        )
-//        ViewCompat.postInvalidateOnAnimation(this)
+        println("VX: $vX, VY: $vY")
+        scroller.fling(
+                scrollX, scrollY,
+                vX.toInt() / 10, vY.toInt() / 10,
+                Int.MIN_VALUE, Int.MAX_VALUE,
+                Int.MIN_VALUE, Int.MAX_VALUE
+        )
+        ViewCompat.postInvalidateOnAnimation(this)
         true
     }
 
@@ -62,7 +62,7 @@ class FreeScrollView : FrameLayout {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return if (childCount == 1) {
             val actionMasked = event.actionMasked
-            if ((actionMasked == MotionEvent.ACTION_DOWN || actionMasked == MotionEvent.ACTION_POINTER_DOWN) && !scroller.isFinished) {
+            if ((actionMasked == MotionEvent.ACTION_DOWN || actionMasked == MotionEvent.ACTION_POINTER_DOWN || actionMasked == MotionEvent.ACTION_MOVE) && !scroller.isFinished) {
                 scroller.abortAnimation()
             }
             gestureDetector.onTouchEvent(event)
@@ -72,29 +72,32 @@ class FreeScrollView : FrameLayout {
     }
 
     override fun computeScroll() {
-        val isFinished = scroller.computeScrollOffset()
-        val requestX = scroller.currX
-        val requestY = scroller.currY
-        val oldScrollX = scrollX
-        val oldScrollY = scrollY
-        val dX = requestX - oldScrollX
-        val dY = requestY - oldScrollY
-        val (rangeX, rangeY) = getScrollRange()
-        scrollXY(
-                dX = dX,
-                scrolledX = oldScrollX,
-                rangeX = rangeX,
-                dY = dY,
-                scrolledY = oldScrollY,
-                rangeY = rangeY)
-        val newScrollX = scrollX
-        val newScrollY = scrollY
-        if (newScrollX != oldScrollX || newScrollY != oldScrollY) {
-            if (!isFinished) {
-                ViewCompat.postInvalidateOnAnimation(this)
+        if (!scroller.isFinished) {
+            scroller.computeScrollOffset()
+            val requestX = scroller.currX
+            val requestY = scroller.currY
+            val oldScrollX = scrollX
+            val oldScrollY = scrollY
+            val dX = requestX - oldScrollX
+            val dY = requestY - oldScrollY
+            val isFinished = scroller.isFinished
+            val (rangeX, rangeY) = getScrollRange()
+            scrollXY(
+                    dX = dX,
+                    scrolledX = oldScrollX,
+                    rangeX = rangeX,
+                    dY = dY,
+                    scrolledY = oldScrollY,
+                    rangeY = rangeY)
+            val newScrollX = scrollX
+            val newScrollY = scrollY
+            if (newScrollX != oldScrollX || newScrollY != oldScrollY) {
+                if (!isFinished) {
+                    ViewCompat.postInvalidateOnAnimation(this)
+                }
+            } else {
+                scroller.abortAnimation()
             }
-        } else {
-            scroller.abortAnimation()
         }
     }
 
