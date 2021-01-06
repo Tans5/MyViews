@@ -86,7 +86,6 @@ class GestureDetector(
             }
 
             MotionEvent.ACTION_POINTER_UP -> {
-                recycleVelocityTracker()
                 val newIndex = if (activeIndex == 0) {
                     1
                 } else {

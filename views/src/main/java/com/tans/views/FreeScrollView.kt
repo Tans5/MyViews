@@ -50,11 +50,6 @@ class FreeScrollView : FrameLayout {
     init {
         isClickable = true
         isFocusable = true
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            setOnScrollChangeListener { view, newX, newY, oldX, oldY ->
-//                println("NewX: $newX, NewY: $newY, OldX: $oldX, OldY: $oldY")
-//            }
-//        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
