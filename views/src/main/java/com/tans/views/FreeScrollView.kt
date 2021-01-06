@@ -29,11 +29,12 @@ class FreeScrollView : FrameLayout {
 
     private val flingListener: GestureFlingListener = { vX, vY ->
         println("VX: $vX, VY: $vY")
+        val (rangeX, rangeY) = getScrollRange()
         scroller.fling(
                 scrollX, scrollY,
                 -vX.toInt(), -vY.toInt(),
-                Int.MIN_VALUE, Int.MAX_VALUE,
-                Int.MIN_VALUE, Int.MAX_VALUE
+                0, rangeX,
+                0, rangeY
         )
         ViewCompat.postInvalidateOnAnimation(this)
         true
@@ -76,21 +77,17 @@ class FreeScrollView : FrameLayout {
             val dY = requestY - oldScrollY
             val isFinished = scroller.isFinished
             val (rangeX, rangeY) = getScrollRange()
-            scrollXY(
-                    dX = -dX,
-                    scrolledX = oldScrollX,
-                    rangeX = rangeX,
-                    dY = -dY,
-                    scrolledY = oldScrollY,
-                    rangeY = rangeY)
-            val newScrollX = scrollX
-            val newScrollY = scrollY
-            if (newScrollX != oldScrollX || newScrollY != oldScrollY) {
-                if (!isFinished) {
-                    ViewCompat.postInvalidateOnAnimation(this)
-                }
-            } else {
-                scroller.abortAnimation()
+            if (dX != 0 || dY != 0) {
+                scrollXY(
+                        dX = -dX,
+                        scrolledX = oldScrollX,
+                        rangeX = rangeX,
+                        dY = -dY,
+                        scrolledY = oldScrollY,
+                        rangeY = rangeY)
+            }
+            if (!isFinished) {
+                ViewCompat.postInvalidateOnAnimation(this)
             }
         }
     }
@@ -176,8 +173,6 @@ class FreeScrollView : FrameLayout {
                 newScrollY
             }
         }
-
-        println("DX: $dX, scrolledX: $scrolledX, rangeX: $rangeX, dY: $dY, scrolledY: $scrolledY, rangeY: $rangeY, newFixedX: $newXFixed, newFixed: $newYFixed")
         scrollTo(newXFixed, newYFixed)
     }
 
