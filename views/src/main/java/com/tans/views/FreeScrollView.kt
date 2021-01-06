@@ -2,7 +2,6 @@ package com.tans.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -32,7 +31,7 @@ class FreeScrollView : FrameLayout {
         println("VX: $vX, VY: $vY")
         scroller.fling(
                 scrollX, scrollY,
-                vX.toInt() / 10, vY.toInt() / 10,
+                -vX.toInt(), -vY.toInt(),
                 Int.MIN_VALUE, Int.MAX_VALUE,
                 Int.MIN_VALUE, Int.MAX_VALUE
         )
@@ -83,10 +82,10 @@ class FreeScrollView : FrameLayout {
             val isFinished = scroller.isFinished
             val (rangeX, rangeY) = getScrollRange()
             scrollXY(
-                    dX = dX,
+                    dX = -dX,
                     scrolledX = oldScrollX,
                     rangeX = rangeX,
-                    dY = dY,
+                    dY = -dY,
                     scrolledY = oldScrollY,
                     rangeY = rangeY)
             val newScrollX = scrollX
@@ -110,12 +109,7 @@ class FreeScrollView : FrameLayout {
             parentWidthMeasureSpec: Int,
             parentHeightMeasureSpec: Int
     ) {
-        if (child != null) {
-            val lp = child.layoutParams as MarginLayoutParams
-            val childWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.UNSPECIFIED)
-            val childHeightSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.UNSPECIFIED)
-            child.measure(childWidthSpec, childHeightSpec)
-        }
+        measureChildWithMargins(child, parentWidthMeasureSpec, 0, parentHeightMeasureSpec, 0)
     }
 
     override fun measureChildWithMargins(
@@ -127,8 +121,31 @@ class FreeScrollView : FrameLayout {
     ) {
         if (child != null) {
             val lp = child.layoutParams as MarginLayoutParams
-            val childWidthSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin + lp.width, MeasureSpec.EXACTLY)
-            val childHeightSpec = MeasureSpec.makeMeasureSpec(lp.leftMargin + lp.bottomMargin + lp.height, MeasureSpec.EXACTLY)
+            fun getChildMeasureSpec(parentSpec: Int, padding: Int, childDimension: Int, margin: Int): Int {
+                return when (childDimension) {
+                    ViewGroup.LayoutParams.MATCH_PARENT -> {
+                        ViewGroup.getChildMeasureSpec(parentSpec, padding + margin, childDimension)
+                    }
+                    ViewGroup.LayoutParams.WRAP_CONTENT -> {
+                        MeasureSpec.makeMeasureSpec(margin, MeasureSpec.UNSPECIFIED)
+                    }
+                    else -> {
+                        MeasureSpec.makeMeasureSpec(childDimension, MeasureSpec.EXACTLY)
+                    }
+                }
+            }
+            val childWidthSpec = getChildMeasureSpec(
+                    parentSpec = parentWidthMeasureSpec,
+                    padding = widthUsed + paddingStart + paddingEnd,
+                    childDimension = lp.width,
+                    margin = lp.marginStart + lp.marginEnd
+            )
+            val childHeightSpec = getChildMeasureSpec(
+                    parentSpec = parentHeightMeasureSpec,
+                    padding = heightUsed + paddingTop + paddingBottom,
+                    childDimension = lp.height,
+                    margin = lp.topMargin + lp.bottomMargin
+            )
             child.measure(childWidthSpec, childHeightSpec)
         }
     }

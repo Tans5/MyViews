@@ -53,4 +53,13 @@
         <attr name="tips_background_color" format="color" />
     </declare-styleable>
 
+    <!-- ExpandableCardView -->
+    <declare-styleable name="ExpandableCardView">
+        <attr name="fold_offset" format="dimension" />
+        <attr name="default_state" format="enum">
+            <enum name="fold" value="0" />
+            <enum name="expand" value="1" />
+        </attr>
+    </declare-styleable>
+
 </resources>
